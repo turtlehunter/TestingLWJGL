@@ -10,71 +10,56 @@ import java.util.logging.Logger;
 
 
 public class Main {
-    public static void main(String[] args) {
+    private static Game game;
 
+    public static void main(String[] args) {
+        //Step 1: Initialize program
         initDisplay();
         initGL();
+
+        //Step 2: Initialize game
+        initGame();
+
+        //Step 3: Start game loop
         gameLoop();
+
+        //Step 7: Cleanup
         cleanUp();
+    }
+
+    private static void initGame() {
+        game = new Game();
+    }
+
+    private static void getInput() {
+        game.getInput();
+    }
+
+    private static void update() {
+        game.update();
+    }
+
+    private static void render() {
+        glClear(GL_COLOR_BUFFER_BIT); //clear color buffer
+        glLoadIdentity(); //fixes translate
+
+        game.render();
+
+        Display.update();
+        Display.sync(60);
     }
 
     private static void gameLoop() {
         while(!Display.isCloseRequested()) {
-            glClear(GL_COLOR_BUFFER_BIT); //clear color buffer
-            glLoadIdentity(); //fixes translate
+            //Step 4: Get user input
+            getInput();
 
-            glColor3f(0.25f, 0.75f, 0.5f); //set color (optional, default is white)
+            //Step 5: Update logic
+            update();
 
-            //drawRect(56, 56, 32, 256);
-            drawRect(400, 400, 224, 32);
-
-            Display.update();
-
+            //Step 6: Render
+            render();
         }
-    }
-
-    private static void drawRect(float x, float y, float width, float height) {
-        drawRect(x, y, width, height, 0);
-    }
-
-    private static void drawRectFromCenter(float x, float y, float width, float height, float rot) {
-        glPushMatrix(); //stack. Unique matrix per rectangle so its correct position
-        {
-            width /= 2; //to draw on center
-            height /= 2;
-
-
-            glTranslatef(x, y, 0); //move everything certain amount. 1,0,0 makes funny animation :P
-            glRotatef(rot, 0, 0, 1); //Z always point to camera
-
-            glBegin(GL_QUADS);
-            { //not needed but looks nicer
-                glVertex2f(-width, -height); //replace 0 with negative to draw on center
-                glVertex2f(-width, height); //make points
-                glVertex2f(width, height);
-                glVertex2f(width, -height);
-            }
-            glEnd();
-        }
-        glPopMatrix();
-    }
-
-    private static void drawRect(float x, float y, float width, float height, float rot) {
-        glPushMatrix(); //stack. Unique matrix per rectangle so its correct position
-        {
-            glTranslatef(x, y, 0); //move everything certain amount. 1,0,0 makes funny animation :P
-            glRotatef(rot, 0, 0, 1); //Z always point to camera
-
-            glBegin(GL_QUADS);
-            { //not needed but looks nicer
-                glVertex2f(0, 0);
-                glVertex2f(0, height); //make points
-                glVertex2f(width, height);
-                glVertex2f(width, 0);
-            }
-            glEnd();
-        }
-        glPopMatrix();
     }
 
     private static void cleanUp() {
@@ -98,6 +83,7 @@ public class Main {
         try {
             Display.setDisplayMode(new DisplayMode(800, 600));
             Display.create();
+            Display.setVSyncEnabled(true);
         } catch (LWJGLException e) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, e);
         }
